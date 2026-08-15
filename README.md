@@ -1,6 +1,6 @@
 # Text Summarizer
 
-Abstractive summarization for English articles. Paste a long piece of prose and get a shorter rewrite — not a handful of sentences copied from the original.
+Abstractive summarization for English articles. Paste a long piece of prose and get a shorter rewrite - not a handful of sentences copied from the original.
 
 The app is a FastAPI service around Hugging Face `sshleifer/distilbart-cnn-12-6`, with a simple reading UI at `/`.
 
@@ -84,6 +84,6 @@ requirements.txt
 
 ## Model
 
-Default: [`sshleifer/distilbart-cnn-12-6`](https://huggingface.co/sshleifer/distilbart-cnn-12-6) — a distilled BART, fast enough for a local demo.
+Default: [`sshleifer/distilbart-cnn-12-6`](https://huggingface.co/sshleifer/distilbart-cnn-12-6) - a distilled BART, fast enough for a local demo.
 
 For higher quality and more compute, change `MODEL_NAME` in `main.py` to `facebook/bart-large-cnn`.
