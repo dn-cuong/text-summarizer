@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Summarizer</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,600;1,6..72,400&family=Source+Sans+3:wght@400;500;600&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --paper: #f3efe6;
+      --sheet: #faf8f3;
+      --ink: #2a241c;
+      --muted: #6e665b;
+      --line: #d8d0c3;
+      --olive: #4a5240;
+      --olive-hover: #3c4334;
+      --error: #8a3b32;
+      --shadow: 0 1px 2px rgba(42, 36, 28, 0.04), 0 8px 24px rgba(42, 36, 28, 0.06);
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: var(--paper);
+      color: var(--ink);
+      font-family: "Source Sans 3", Georgia, serif;
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E");
+      opacity: 0.7;
+    }
+
+    .page {
+      position: relative;
+      max-width: 680px;
+      margin: 0 auto;
+      padding: 56px 24px 80px;
+    }
+
+    header {
+      margin-bottom: 36px;
+    }
+
+    .mark {
+      font-family: "Source Sans 3", sans-serif;
+      font-size: 0.72rem;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin: 0 0 10px;
+    }
+
+    h1 {
+      font-family: "Newsreader", Georgia, serif;
+      font-size: 2.35rem;
+      font-weight: 600;
+      letter-spacing: -0.02em;
+      line-height: 1.15;
+      margin: 0;
+    }
+
+    .composer {
+      background: var(--sheet);
+      border: 1px solid var(--line);
+      box-shadow: var(--shadow);
+      padding: 22px 22px 18px;
+    }
+
+    label {
+      display: block;
+      font-size: 0.78rem;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 10px;
+    }
+
+    textarea {
+      width: 100%;
+      min-height: 240px;
+      border: 0;
+      padding: 0;
+      resize: vertical;
+      background: transparent;
+      color: var(--ink);
+      font-family: "Newsreader", Georgia, serif;
+      font-size: 1.12rem;
+      line-height: 1.65;
+      outline: none;
+    }
+
+    textarea::placeholder {
+      color: #a39a8c;
+    }
+
+    .toolbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      flex-wrap: wrap;
+      margin-top: 18px;
+      padding-top: 16px;
+      border-top: 1px solid var(--line);
+    }
+
+    .lengths {
+      display: flex;
+      gap: 6px;
+    }
+
+    .lengths button {
+      background: transparent;
+      color: var(--muted);
+      border: 1px solid var(--line);
+      padding: 7px 12px;
+      font: inherit;
+      font-size: 0.88rem;
+      cursor: pointer;
+    }
+
+    .lengths button[aria-pressed="true"] {
+      background: #ece6d8;
+      color: var(--ink);
+      border-color: #cfc6b6;
+    }
+
+    .primary {
+      background: var(--olive);
+      color: #f6f3ec;
+      border: 0;
+      padding: 10px 18px;
+      font: inherit;
+      font-size: 0.95rem;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .primary:hover { background: var(--olive-hover); }
+    .primary:disabled { opacity: 0.55; cursor: wait; }
+
+    .hint {
+      margin: 14px 2px 0;
+      font-size: 0.82rem;
+      color: var(--muted);
+    }
+
+    .sample {
+      background: none;
+      border: 0;
+      padding: 0;
+      color: var(--olive);
+      font: inherit;
+      font-size: inherit;
+      text-decoration: underline;
+      text-underline-offset: 2px;
+      cursor: pointer;
+    }
+
+    .result {
+      display: none;
+      margin-top: 28px;
+      padding: 8px 4px 0;
+    }
+
+    .result.show { display: block; }
+
+    .result h2 {
+      font-family: "Source Sans 3", sans-serif;
+      font-size: 0.72rem;
+      font-weight: 600;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin: 0 0 12px;
+    }
+
+    .summary {
+      font-family: "Newsreader", Georgia, serif;
+      font-size: 1.2rem;
+      line-height: 1.7;
+      margin: 0;
+    }
+
+    .meta {
+      margin-top: 16px;
+      color: var(--muted);
+      font-size: 0.85rem;
+    }
+
+    .error { color: var(--error); }
+
+    footer {
+      margin-top: 48px;
+      color: var(--muted);
+      font-size: 0.82rem;
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <header>
+      <p class="mark">Reading tool</p>
+      <h1>A shorter version of a long article.</h1>
+    </header>
+
+    <section class="composer">
+      <label for="text">Your article</label>
+      <textarea id="text" placeholder="Paste the piece you want condensed…"></textarea>
+      <div class="toolbar">
+        <div class="lengths" role="group" aria-label="Summary length">
+          <button type="button" data-min="20" data-max="60" aria-pressed="false">Short</button>
+          <button type="button" data-min="30" data-max="130" aria-pressed="true">Medium</button>
+          <button type="button" data-min="80" data-max="220" aria-pressed="false">Long</button>
+        </div>
+        <button class="primary" id="btn" type="button">Summarize this</button>
+      </div>
+    </section>
+    <p class="hint">
+      Works best with news and essays in English.
+      <button class="sample" id="sample" type="button">Try a sample</button>
+    </p>
+
+    <section id="result" class="result" aria-live="polite">
+      <h2>Summary</h2>
+      <p id="summary" class="summary"></p>
+      <p id="meta" class="meta"></p>
+    </section>
+
+    <footer>First run may take a minute while the model loads. Later summaries are usually a few seconds.</footer>
+  </div>
+
+  <script>
+    const SAMPLE = `Over the past decade, machine learning models have moved from research labs into everyday products such as search engines, translation apps, and virtual assistants. Large language models can now draft emails, summarize documents, write code, and answer questions in natural language. At the same time, researchers warn about risks including bias, misinformation, and high energy costs. Companies are investing in smaller, more efficient models that can run on laptops and phones instead of giant data centers. Governments are also drafting regulations to require transparency, safety testing, and clearer labeling of AI-generated content. Educators argue that students still need strong critical thinking skills because these tools can invent facts. The next few years will likely focus on making the technology more reliable, cheaper to run, and easier to audit, rather than only making models larger.`;
+
+    const btn = document.getElementById("btn");
+    const result = document.getElementById("result");
+    const summaryEl = document.getElementById("summary");
+    const metaEl = document.getElementById("meta");
+    const lengthButtons = [...document.querySelectorAll(".lengths button")];
+
+    let min_length = 30;
+    let max_length = 130;
+
+    lengthButtons.forEach((button) => {
+      button.addEventListener("click", () => {
+        lengthButtons.forEach((other) => other.setAttribute("aria-pressed", "false"));
+        button.setAttribute("aria-pressed", "true");
+        min_length = Number(button.dataset.min);
+        max_length = Number(button.dataset.max);
+      });
+    });
+
+    document.getElementById("sample").addEventListener("click", () => {
+      document.getElementById("text").value = SAMPLE;
+      document.getElementById("text").focus();
+    });
+
+    btn.addEventListener("click", async () => {
+      const text = document.getElementById("text").value.trim();
+
+      if (!text) {
+        result.classList.add("show");
+        summaryEl.textContent = "";
+        metaEl.innerHTML = '<span class="error">Paste some text first.</span>';
+        return;
+      }
+
+      btn.disabled = true;
+      btn.textContent = "Reading…";
+      result.classList.add("show");
+      summaryEl.textContent = "";
+      metaEl.textContent = "Writing a shorter version.";
+
+      try {
+        const res = await fetch("/summarize", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ text, min_length, max_length }),
+        });
+        const data = await res.json();
+        if (!res.ok) {
+          throw new Error(data.detail || "Something went wrong.");
+        }
+        summaryEl.textContent = data.summary.trim();
+        const seconds = (data.latency_ms / 1000).toFixed(1);
+        metaEl.textContent = `${data.input_length_chars} characters in, ${data.summary_length_chars} out · ${seconds}s`;
+      } catch (err) {
+        summaryEl.textContent = "";
+        metaEl.innerHTML = `<span class="error">${err.message}</span>`;
+      } finally {
+        btn.disabled = false;
+        btn.textContent = "Summarize this";
+      }
+    });
+  </script>
+</body>
+</html>
